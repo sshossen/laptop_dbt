@@ -98,7 +98,37 @@ All tests passed, ensuring the schema is clean and reliable.
 
 ## 🚀 How to Run
 
-1. Clone this repo
+1. **Clone this repo**
    ```bash
-   git clone https://github.com/yourusername/laptop-dbt-project.git
-   cd laptop-dbt-project
+   git clone https://github.com/sshossen/laptop_dbt.git
+   cd laptop_dbt
+2. **Create a virtual environment and install dependencies**
+   ```bash
+   python3 -m venv venv
+   source venv/bin/activate    # Mac/Linux
+   # or: venv\Scripts\activate  # Windows
+   pip install -r requirements.txt
+3. **Configure dbt connection (edit your profiles.yml)**  
+Example for Postgres:
+
+```yaml
+laptop_dbt:
+  target: dev
+  outputs:
+    dev:
+      type: postgres
+      host: localhost
+      user: your_user
+      password: your_password
+      port: 5432
+      dbname: your_database
+      schema: public
+```
+4.**Run dbt commands**
+   ```bash
+   dbt run             # build models
+   dbt test            # run tests
+   dbt docs generate   # build docs locally
+   dbt docs serve      # serve docs locally
+
+
