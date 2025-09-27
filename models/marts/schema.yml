@@ -1,0 +1,167 @@
+version: 2
+models:
+  # =========================
+  # DIMENSIONS
+  # =========================
+  - name: dim_company
+    description: "Company dimension. One row per laptop brand/manufacturer."
+    columns:
+      - name: company_sk
+        description: "Surrogate key (MD5) for the company record."
+        tests: [not_null, unique]
+      - name: company_name
+        description: "Normalized brand/manufacturer name (e.g., Apple, Dell, HP)."
+
+  - name: dim_product
+    description: "Product dimension. One row per product (model) and type."
+    columns:
+      - name: product_sk
+        description: "Surrogate key (MD5) of product_name + type_name."
+        tests: [not_null, unique]
+      - name: product_name
+        description: "Laptop model name (e.g., MacBook Pro, ThinkPad X1)."
+      - name: type_name
+        description: "Product category (e.g., Ultrabook, Gaming, Notebook)."
+
+  - name: dim_cpu
+    description: "CPU dimension. Brand and generation/series info."
+    columns:
+      - name: cpu_sk
+        description: "Surrogate key (MD5) of cpu_brand + cpu_generation."
+        tests: [not_null, unique]
+      - name: cpu_brand
+        description: "CPU vendor (Intel, AMD, Apple Silicon if present)."
+      - name: cpu_generation
+        description: "CPU family/series label (e.g., i5-7200U, i7, Ryzen 5)."
+
+  - name: dim_gpu
+    description: "GPU dimension. Brand and type (integrated/discrete/family)."
+    columns:
+      - name: gpu_sk
+        description: "Surrogate key (MD5) of gpu_brand + gpu_type."
+        tests: [not_null, unique]
+      - name: gpu_brand
+        description: "GPU vendor (Intel, NVIDIA, AMD)."
+      - name: gpu_type
+        description: "GPU family/type (e.g., Iris Plus, GeForce GTX 1050)."
+
+  - name: dim_os
+    description: "Operating system dimension."
+    columns:
+      - name: os_sk
+        description: "Surrogate key (MD5) of normalized OS name."
+        tests: [not_null, unique]
+      - name: os_name
+        description: "Normalized OS (Windows, macOS, Linux, No OS)."
+
+  - name: dim_display
+    description: "Display dimension. Resolution, size, and panel flags."
+    columns:
+      - name: display_sk
+        description: "Surrogate key (MD5) of inches + resolution + panel flags."
+        tests: [not_null, unique]
+      - name: inches
+        description: "Screen size in inches (diagonal)."
+      - name: resolution_x
+        description: "Horizontal pixel count (width)."
+      - name: resolution_y
+        description: "Vertical pixel count (height)."
+      - name: ips
+        description: "True if IPS panel mentioned, else false."
+      - name: retina
+        description: "True if Retina (Apple high-DPI) mentioned, else false."
+      - name: touchscreen
+        description: "True if touchscreen mentioned, else false."
+
+  - name: dim_storage
+    description: "Storage composition dimension (HDD/SSD/Hybrid/Flash sizes)."
+    columns:
+      - name: storage_sk
+        description: "Surrogate key (MD5) of HDD/SSD/Hybrid/Flash GB fields."
+        tests: [not_null, unique]
+      - name: memory_hdd
+        description: "HDD capacity in GB (0 if none)."
+      - name: memory_ssd
+        description: "SSD capacity in GB (0 if none)."
+      - name: memory_hybrid
+        description: "Hybrid/SSHD capacity in GB (0 if none)."
+      - name: memory_flash_storage
+        description: "Flash storage capacity in GB (0 if none)."
+
+  # =========================
+  # FACT
+  # =========================
+  - name: fact_laptop
+    description: |
+      Fact table at one row per laptop. Holds foreign keys to all dimensions
+      and key measures/specs for analysis (price, RAM, weight, display attrs).
+    columns:
+      - name: laptop_id_nat
+        description: "Natural key from source record (unique per laptop row)."
+        tests: [not_null, unique]
+
+      # Foreign keys
+      - name: company_sk
+        description: "FK to dim_company."
+        tests:
+          - relationships:
+              to: ref('dim_company')
+              field: company_sk
+      - name: product_sk
+        description: "FK to dim_product."
+        tests:
+          - relationships:
+              to: ref('dim_product')
+              field: product_sk
+      - name: cpu_sk
+        description: "FK to dim_cpu."
+        tests:
+          - relationships:
+              to: ref('dim_cpu')
+              field: cpu_sk
+      - name: gpu_sk
+        description: "FK to dim_gpu."
+        tests:
+          - relationships:
+              to: ref('dim_gpu')
+              field: gpu_sk
+      - name: os_sk
+        description: "FK to dim_os."
+        tests:
+          - relationships:
+              to: ref('dim_os')
+              field: os_sk
+      - name: display_sk
+        description: "FK to dim_display."
+        tests:
+          - relationships:
+              to: ref('dim_display')
+              field: display_sk
+      - name: storage_sk
+        description: "FK to dim_storage."
+        tests:
+          - relationships:
+              to: ref('dim_storage')
+              field: storage_sk
+
+      # Measures / attributes
+      - name: price
+        description: "Price (numeric). Currency depends on source."
+      - name: ram
+        description: "RAM in GB (numeric)."
+      - name: weight
+        description: "Weight in kg (numeric)."
+      - name: inches
+        description: "Screen size in inches (duplicated for convenience)."
+      - name: resolution_x
+        description: "Horizontal pixels (duplicated for convenience)."
+      - name: resolution_y
+        description: "Vertical pixels (duplicated for convenience)."
+      - name: ips
+        description: "True if IPS panel; duplicated for filters."
+      - name: retina
+        description: "True if Retina panel; duplicated for filters."
+      - name: touchscreen
+        description: "True if touchscreen; duplicated for filters."
+      - name: type_name
+        description: "Product category (denormalized convenience attribute)."

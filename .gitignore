@@ -1,0 +1,17 @@
+# Virtual environment
+venv/
+
+# dbt build artifacts
+target/
+dbt_packages/
+logs/
+
+# Python cache
+__pycache__/
+
+# Jupyter notebooks auto-saves
+.ipynb_checkpoints/
+
+# macOS junk
+.DS_Store
+
