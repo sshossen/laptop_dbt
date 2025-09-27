@@ -1,0 +1,11 @@
+# Ignore notebooks when detecting repo language stats
+notebooks/* linguist-vendored
+
+# Count dbt models (.sql) as SQL
+models/* linguist-detectable=true
+analyses/* linguist-detectable=true
+snapshots/* linguist-detectable=true
+
+# Count config files (.yml) as YAML
+*.yml linguist-detectable=true
+*.yaml linguist-detectable=true
